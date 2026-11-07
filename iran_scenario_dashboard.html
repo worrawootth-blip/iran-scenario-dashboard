@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Iran Scenario Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f5f3ee;--panel:#ffffff;--panel2:#efece5;--text:#1c1e22;--muted:#5f646c;--border:#ddd8ce;
+  --grid:rgba(0,0,0,.07);--accent:#b2412b;--accent2:#2c5a86;--good:#2e8b57;--bad:#c0392b;--warn:#c98a10;
+  --s1:#2e9a66;--s2:#3a8fb7;--s3:#d1a01a;--s4:#e07b39;--s5:#8a8f98;--s6:#d0453b;--s7:#7e1830;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111317;--panel:#1a1d22;--panel2:#22262c;--text:#e9e6e0;--muted:#9ba1a9;--border:#2f343b;
+    --grid:rgba(255,255,255,.07);--accent:#e57a62;--accent2:#7fb0de;--good:#4cc28a;--bad:#ef6a5e;--warn:#e6b23e;
+    --s7:#c2405e;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111317;--panel:#1a1d22;--panel2:#22262c;--text:#e9e6e0;--muted:#9ba1a9;--border:#2f343b;
+  --grid:rgba(255,255,255,.07);--accent:#e57a62;--accent2:#7fb0de;--good:#4cc28a;--bad:#ef6a5e;--warn:#e6b23e;
+  --s7:#c2405e;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:"IBM Plex Sans Thai",system-ui,sans-serif;font-size:15px;line-height:1.55;overflow-x:hidden}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+header{padding:22px 16px 14px;border-bottom:1px solid var(--border);background:var(--panel)}
+.wrap{max-width:1400px;margin:0 auto}
+header h1{margin:0;font-size:clamp(20px,3vw,28px);letter-spacing:-.01em}
+header .sub{color:var(--muted);font-size:14px;margin-top:4px}
+.badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:99px;background:var(--panel2);border:1px solid var(--border);color:var(--muted);margin-right:6px}
+.disclaimer{margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--warn);padding:4px 10px;background:var(--panel2);border-radius:4px}
+.layout{display:grid;grid-template-columns:330px 1fr;gap:16px;padding:16px;max-width:1400px;margin:0 auto}
+@media (max-width:960px){.layout{grid-template-columns:1fr}}
+aside{position:sticky;top:12px;align-self:start;max-height:calc(100vh - 24px);overflow:auto;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px}
+@media (max-width:960px){aside{position:static;max-height:none}}
+aside h2{font-size:15px;margin:4px 0 8px}
+.opt-list{display:grid;gap:6px;margin-bottom:12px}
+.opt-btn{text-align:left;border:1px solid var(--border);background:var(--panel2);color:var(--text);border-radius:8px;padding:8px 10px;cursor:pointer;font:inherit;font-size:13.5px}
+.opt-btn b{display:block;font-size:14px}
+.opt-btn.active{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent);background:var(--panel)}
+.drv{margin:10px 0 12px}
+.drv label{display:flex;justify-content:space-between;gap:8px;font-size:13px}
+.drv label span.v{font-family:"IBM Plex Mono";color:var(--accent);min-width:28px;text-align:right}
+.drv small{display:block;color:var(--muted);font-size:11.5px;line-height:1.35}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--border);background:var(--panel2);color:var(--text);border-radius:7px;padding:6px 10px;font:inherit;font-size:13px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.chk{display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:8px 0}
+main{min-width:0}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0}
+nav.tabs button{border:1px solid var(--border);background:var(--panel);color:var(--muted);padding:7px 12px;border-radius:99px;font:inherit;font-size:13.5px;cursor:pointer}
+nav.tabs button.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+section.tab{display:none}
+section.tab.active{display:block}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:1100px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;min-width:0}
+.card h3{margin:0 0 4px;font-size:15.5px}
+.card .note{color:var(--muted);font-size:12.5px;margin:0 0 10px}
+.kpi .lbl{font-size:12.5px;color:var(--muted)}
+.kpi .val{font-size:24px;font-weight:700;letter-spacing:-.01em;font-family:"IBM Plex Mono"}
+.kpi .foot{font-size:11.5px;color:var(--muted)}
+.chart-box{position:relative;height:300px}
+.chart-box.tall{height:380px}
+.chart-box.short{height:240px}
+.scroll-x{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border-bottom:1px solid var(--border);padding:7px 8px;text-align:left;vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:12px;background:var(--panel2);position:sticky;top:0}
+td.num{font-family:"IBM Plex Mono";text-align:right;white-space:nowrap}
+.pbar{height:7px;background:var(--panel2);border-radius:4px;overflow:hidden;min-width:60px}
+.pbar i{display:block;height:100%}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.tag{font-size:11px;padding:1px 7px;border-radius:99px;border:1px solid var(--border);white-space:nowrap}
+.tag.best{color:var(--good);border-color:var(--good)}
+.tag.worst{color:var(--bad);border-color:var(--bad)}
+.tag.mid{color:var(--warn);border-color:var(--warn)}
+.narr{font-size:14px;background:var(--panel2);border-radius:8px;padding:10px 12px;border:1px solid var(--border)}
+.ladder{display:flex;flex-direction:column-reverse;gap:4px}
+.rung{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;background:var(--panel2);border:1px solid var(--border);font-size:13px}
+.rung .n{font-family:"IBM Plex Mono";color:var(--muted);width:18px}
+.rung.now{border-color:var(--accent2);box-shadow:inset 3px 0 0 var(--accent2)}
+.rung.sel{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.rung .flag{margin-left:auto;font-size:11px}
+svg text{font-family:"IBM Plex Sans Thai",sans-serif}
+.legend-inline{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted)}
+.heat td{text-align:center;font-family:"IBM Plex Mono";font-size:12px}
+.pass{color:var(--good);font-weight:600}.fail{color:var(--bad);font-weight:600}
+details summary{cursor:pointer;font-weight:600}
+.theory h4{margin:12px 0 2px;font-size:14.5px}
+.theory p{margin:2px 0 6px;font-size:13.5px}
+.formula{font-family:"IBM Plex Mono";font-size:12.5px;background:var(--panel2);padding:6px 10px;border-radius:6px;overflow-x:auto;white-space:pre}
+a{color:var(--accent2)}
+.src li{font-size:13px;margin-bottom:4px}
+footer{padding:16px;color:var(--muted);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <span class="badge">Policy Scenario Lab</span><span class="badge">ข้อมูลฐาน ณ 7 พ.ย. 2026</span>
+    <h1>ห้องปฏิบัติการฉากทัศน์: หากสหรัฐฯ ตัดสินใจบุกยึดอิหร่าน</h1>
+    <div class="sub">แบบจำลองเชิงความน่าจะเป็นเพื่อวิเคราะห์ทางเลือกนโยบาย 4 แบบ × ฉากทัศน์ 7 รูปแบบ (Best → Worst) ภายใต้ตัวขับเคลื่อนสำคัญ 9 ตัว</div>
+    <div class="disclaimer">เครื่องมือเพื่อการศึกษาและฝึกคิดเชิงนโยบาย ค่าสัมประสิทธิ์ทั้งหมดเป็น <b>สมมติฐานเชิงผู้เชี่ยวชาญ (expert judgment) ที่ปรับได้</b> ไม่ใช่การพยากรณ์ ผลลัพธ์สะท้อนสมมติฐานที่ผู้ใช้กำหนด — โปรดปรับแถบเลื่อนเพื่อทดสอบมุมมองต่าง ๆ</div>
+  </div>
+</header>
+
+<div class="layout">
+<aside>
+  <h2>① ทางเลือกนโยบายที่วิเคราะห์</h2>
+  <div class="opt-list" id="optList"></div>
+  <h2>② ตัวขับเคลื่อน (Key Drivers)</h2>
+  <div class="row" style="margin-bottom:6px">
+    <button class="btn" data-preset="base">ฐาน พ.ย. 2026</button>
+    <button class="btn" data-preset="opt">มองแง่ดี</button>
+    <button class="btn" data-preset="pes">มองแง่ร้าย</button>
+  </div>
+  <div id="drivers"></div>
+  <label class="chk"><input type="checkbox" id="crossChk"> <span>รวม <b>ผลกระทบไขว้</b> ระหว่างตัวขับเคลื่อน (Cross-Impact, 1 รอบ)</span></label>
+  <label class="chk"><input type="checkbox" id="prospectChk"> <span>ประเมินแบบ <b>Prospect Theory</b> (ผู้ตัดสินใจกลัวการสูญเสีย) แทนอรรถประโยชน์คาดหมายแบบมีเหตุผล</span></label>
+  <div class="drv">
+    <label>เกณฑ์ความเสี่ยงทางการเมืองที่ยอมรับได้ (Poliheuristic) <span class="v" id="thrV">50</span></label>
+    <input type="range" id="thr" min="10" max="90" value="50">
+    <small>ทางเลือกที่ดัชนีความเสี่ยงการเมืองภายในเกินค่านี้จะถูก "ตัดทิ้ง" ในขั้นแรก</small>
+  </div>
+</aside>
+
+<main>
+  <nav class="tabs" id="tabs">
+    <button data-tab="ov" class="active">ภาพรวม</button>
+    <button data-tab="sc">ฉากทัศน์ทั้ง 7</button>
+    <button data-tab="dec">เปรียบเทียบทางเลือก</button>
+    <button data-tab="mc">Monte Carlo</button>
+    <button data-tab="sens">ความอ่อนไหว</button>
+    <button data-tab="hist">บทเรียนประวัติศาสตร์</button>
+    <button data-tab="meth">กรอบทฤษฎี & ที่มา</button>
+  </nav>
+
+  <!-- OVERVIEW -->
+  <section class="tab active" id="tab-ov">
+    <div class="grid g4" style="margin-bottom:14px">
+      <div class="card kpi"><div class="lbl">ระยะเวลาสงครามสหรัฐ/อิสราเอล–อิหร่าน</div><div class="val">~8 เดือน</div><div class="foot">เริ่ม 28 ก.พ. 2026 (สงครามทางอากาศ-ทะเล)</div></div>
+      <div class="card kpi"><div class="lbl">ต้นทุนกลาโหมสหรัฐ (ประเมินโดย DoD)</div><div class="val">$47.1B</div><div class="foot">ณ ต.ค. 2026</div></div>
+      <div class="card kpi"><div class="lbl">ราคาน้ำมันดิบเบรนท์</div><div class="val">&gt;$104</div><div class="foot">8 ต.ค. 2026 หลังเหตุโจมตีเรือบรรทุกน้ำมัน</div></div>
+      <div class="card kpi"><div class="lbl">ยูเรเนียมเสริมสมรรถนะ 60%</div><div class="val">~440 กก.</div><div class="foot">สถานะ/ที่ตั้งยังไม่แน่ชัด</div></div>
+    </div>
+    <div class="grid g4" style="margin-bottom:14px">
+      <div class="card kpi"><div class="lbl">ฉากทัศน์ที่มีโอกาสสูงสุด</div><div class="val" id="kTop" style="font-size:18px;font-family:inherit">–</div><div class="foot" id="kTopP">–</div></div>
+      <div class="card kpi"><div class="lbl">P(Best: S1+S2)</div><div class="val" id="kBest" style="color:var(--good)">–</div><div class="foot">ชนะเร็ว หรือ ยุติด้วยการต่อรอง</div></div>
+      <div class="card kpi"><div class="lbl">P(Worst: S6+S7)</div><div class="val" id="kWorst" style="color:var(--bad)">–</div><div class="foot">สงครามภูมิภาค / วิกฤตมหาอำนาจ-นิวเคลียร์</div></div>
+      <div class="card kpi"><div class="lbl" id="kEUlbl">อรรถประโยชน์คาดหมาย (EU)</div><div class="val" id="kEU">–</div><div class="foot">สเกล −100 ถึง +100 (มุมมองผลประโยชน์สหรัฐ; ค่า Prospect อาจเกินช่วงเพราะคูณ λ=2.25 ฝั่งสูญเสีย)</div></div>
+    </div>
+    <div class="card" style="margin-bottom:14px"><h3>บทสรุปอัตโนมัติ</h3><div class="narr" id="narr"></div></div>
+    <div class="grid g2">
+      <div class="card">
+        <h3>ความน่าจะเป็นของแต่ละฉากทัศน์</h3>
+        <p class="note">คำนวณด้วยแบบจำลอง Multinomial Logit จากตัวขับเคลื่อน 9 ตัว</p>
+        <div class="chart-box"><canvas id="cProb"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>เมทริกซ์ฉากทัศน์ 2×2 (Schwartz / Shell)</h3>
+        <p class="note">ขนาดวงกลม = ความน่าจะเป็น · ✕ = ตำแหน่งสถานการณ์ปัจจุบันจากค่าตัวขับเคลื่อน</p>
+        <div id="matrix"></div>
+      </div>
+    </div>
+    <div class="grid g2" style="margin-top:14px">
+      <div class="card">
+        <h3>บันไดการยกระดับความขัดแย้ง (Kahn's Escalation Ladder, ฉบับย่อ)</h3>
+        <p class="note"><span style="color:var(--accent2)">■</span> ระดับปัจจุบัน &nbsp; <span style="color:var(--accent)">■</span> ระดับของทางเลือกที่เลือก</p>
+        <div class="ladder" id="ladder"></div>
+      </div>
+      <div class="card">
+        <h3>ผลลัพธ์คาดหมายของทางเลือกที่เลือก</h3>
+        <p class="note">ค่าเฉลี่ยถ่วงน้ำหนักด้วยความน่าจะเป็น (ใช้ค่าเฉลี่ยของการแจกแจงสามเหลี่ยมของแต่ละฉากทัศน์)</p>
+        <div class="grid g2" id="expOut"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENARIOS -->
+  <section class="tab" id="tab-sc">
+    <div class="card" style="margin-bottom:14px">
+      <h3>ตารางฉากทัศน์ 7 รูปแบบ (สำหรับทางเลือกที่เลือก)</h3>
+      <p class="note">ช่วงตัวเลข = (ต่ำสุด–ค่าที่น่าจะเป็น–สูงสุด) ของการแจกแจงสามเหลี่ยม · ดัชนีความสูญเสียมนุษย์ 0–100 (รวมพลเรือน ทหาร ผู้ลี้ภัย)</p>
+      <div class="scroll-x"><table id="scTable"></table></div>
+    </div>
+    <div class="grid g2" id="scCards"></div>
+  </section>
+
+  <!-- DECISION -->
+  <section class="tab" id="tab-dec">
+    <div class="card" style="margin-bottom:14px">
+      <h3>ต้นไม้การตัดสินใจ (Decision Tree)</h3>
+      <p class="note">□ = จุดตัดสินใจ · ○ = จุดโอกาส · คลิกที่ทางเลือกเพื่อกางกิ่งฉากทัศน์ · ตัวเลขท้ายกิ่ง = p และอรรถประโยชน์ U</p>
+      <div class="scroll-x"><div id="tree" style="min-width:680px"></div></div>
+    </div>
+    <div class="grid g2" style="margin-bottom:14px">
+      <div class="card">
+        <h3>อรรถประโยชน์คาดหมาย: Rational vs Prospect Theory</h3>
+        <p class="note">Rational EU = Σ p·U · Prospect = Σ w(p)·v(U) โดย λ=2.25, α=β=0.88, γ=0.61</p>
+        <div class="chart-box"><canvas id="cEU"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>โปรไฟล์ความเสี่ยงของ 4 ทางเลือก</h3>
+        <p class="note">ปรับเป็นสเกล 0–100 · ยิ่งพื้นที่กว้าง = ยิ่งเสี่ยง/สูญเสียมาก</p>
+        <div class="chart-box"><canvas id="cRadar"></canvas></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <h3>ทฤษฎี Poliheuristic (Mintz): คัดกรองสองขั้น</h3>
+      <p class="note">ขั้น 1: ตัดทางเลือกที่ "เสียหายทางการเมืองภายใน" เกินเกณฑ์ (non-compensatory) · ขั้น 2: เลือกจากที่เหลือด้วยอรรถประโยชน์</p>
+      <div class="scroll-x"><table id="polyTable"></table></div>
+    </div>
+    <div class="card">
+      <h3>แบบจำลองการต่อรองก่อนสงคราม (Fearon, 1995)</h3>
+      <p class="note">ช่วงการต่อรองที่ทั้งสองฝ่ายควรยอมรับแทนการรบ = [p − c<sub>US</sub>, p + c<sub>IR</sub>] บนแกน 0 (ยอมตามเงื่อนไขอิหร่าน) → 1 (ยอมตามเงื่อนไขสหรัฐทั้งหมด)</p>
+      <div class="grid g2">
+        <div class="drv"><label>ข้อเรียกร้องของสหรัฐ (เช่น ห้ามเสริมสมรรถนะเด็ดขาด ≈ 0.9) <span class="v" id="usDV">0.85</span></label><input type="range" id="usD" min="0" max="100" value="85"></div>
+        <div class="drv"><label>ข้อเสนอของอิหร่าน (เช่น กลับสู่ MOU มิ.ย. ≈ 0.45) <span class="v" id="irOV">0.45</span></label><input type="range" id="irO" min="0" max="100" value="45"></div>
+      </div>
+      <div class="scroll-x"><div id="fearon" style="min-width:560px"></div></div>
+      <div class="narr" id="fearonTxt" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <!-- MONTE CARLO -->
+  <section class="tab" id="tab-mc">
+    <div class="card" style="margin-bottom:14px">
+      <h3>การจำลอง Monte Carlo</h3>
+      <p class="note">ในแต่ละรอบ: สุ่มรบกวนค่าตัวขับเคลื่อน (ความไม่แน่นอนเชิงข้อมูล) → คำนวณความน่าจะเป็น → สุ่มฉากทัศน์ → สุ่มผลลัพธ์จากการแจกแจงสามเหลี่ยม</p>
+      <div class="grid g4">
+        <div class="drv"><label>จำนวนรอบ <span class="v" id="nV">10000</span></label><input type="range" id="mcN" min="1000" max="30000" step="1000" value="10000"></div>
+        <div class="drv"><label>ความไม่แน่นอนของตัวขับเคลื่อน (σ) <span class="v" id="sigV">12</span></label><input type="range" id="mcS" min="0" max="30" value="12"></div>
+        <div class="drv"><label>Seed <span class="v" id="seedV">2026</span></label><input type="range" id="mcSeed" min="1" max="9999" value="2026"></div>
+        <div class="row" style="align-items:flex-end"><button class="btn primary" id="runMC">▶ รันการจำลอง</button><span class="note" id="mcInfo" style="margin:0"></span></div>
+      </div>
+    </div>
+    <div class="grid g2" style="margin-bottom:14px">
+      <div class="card"><h3>การแจกแจงต้นทุนการคลังสหรัฐ (พันล้าน $)</h3><div class="chart-box short"><canvas id="hCost"></canvas></div></div>
+      <div class="card"><h3>การแจกแจงระยะเวลา (เดือน)</h3><div class="chart-box short"><canvas id="hDur"></canvas></div></div>
+      <div class="card"><h3>ราคาน้ำมันเบรนท์สูงสุด ($/บาร์เรล)</h3><div class="chart-box short"><canvas id="hOil"></canvas></div></div>
+      <div class="card"><h3>อรรถประโยชน์เชิงยุทธศาสตร์ของสหรัฐ</h3><div class="chart-box short"><canvas id="hUtil"></canvas></div></div>
+    </div>
+    <div class="grid g2">
+      <div class="card"><h3>สรุปเชิงสถิติ</h3><p class="note">P10 = กรณีดี · P50 = ค่ากลาง · P90 = กรณีเลวร้าย (tail risk)</p><div class="scroll-x"><table id="mcTable"></table></div></div>
+      <div class="card"><h3>ความถี่ของฉากทัศน์จากการจำลอง</h3><div class="chart-box short"><canvas id="mcFreq"></canvas></div></div>
+    </div>
+  </section>
+
+  <!-- SENSITIVITY -->
+  <section class="tab" id="tab-sens">
+    <div class="card" style="margin-bottom:14px">
+      <h3>Tornado Chart: ตัวขับเคลื่อนใดสำคัญที่สุด?</h3>
+      <div class="row" style="margin-bottom:8px">
+        <span class="note" style="margin:0">ตัวชี้วัด:</span>
+        <button class="btn" data-tm="worst">P(Worst)</button>
+        <button class="btn" data-tm="best">P(Best)</button>
+        <button class="btn" data-tm="eu">อรรถประโยชน์คาดหมาย</button>
+      </div>
+      <p class="note">ปรับตัวขับเคลื่อนทีละตัวไปที่ 0 และ 100 โดยตรึงตัวอื่นไว้ (one-way sensitivity) — แถบยาว = ตัวแปรที่ควรเฝ้าติดตามและลงทุนข่าวกรองมากที่สุด</p>
+      <div class="chart-box tall"><canvas id="cTor"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>เมทริกซ์ผลกระทบไขว้ (Cross-Impact Matrix — Gordon & Helmer)</h3>
+      <p class="note">อ่าน: หาก "แถว" เพิ่มขึ้น จะผลักดัน "คอลัมน์" ไปทาง + หรือ − (−2 ถึง +2) · ใช้เมื่อเปิดตัวเลือก "รวมผลกระทบไขว้"</p>
+      <div class="scroll-x"><table class="heat" id="xTable"></table></div>
+    </div>
+  </section>
+
+  <!-- HISTORY -->
+  <section class="tab" id="tab-hist">
+    <div class="card" style="margin-bottom:14px">
+      <h3>กรณีเทียบเคียงทางประวัติศาสตร์ (Base Rates)</h3>
+      <p class="note">ตัวเลขโดยประมาณจากแหล่งสาธารณะ ใช้เพื่อเทียบสเกล ไม่ใช่การคาดการณ์โดยตรง</p>
+      <div class="scroll-x"><table id="histTable"></table></div>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <h3>เครื่องคำนวณกำลังพลรักษาเสถียรภาพ (Quinlivan, RAND 1995)</h3>
+        <p class="note">กำลังที่ต้องใช้ = ประชากร × อัตราส่วนต่อประชากร 1,000 คน · Quinlivan ชี้ว่าภารกิจที่ยากต้องใช้ ~20 นาย/1,000 คน</p>
+        <div class="drv"><label>ประชากรอิหร่าน (ล้านคน) <span class="v" id="popV">91.6</span></label><input type="range" id="pop" min="60" max="100" step="0.1" value="91.6"></div>
+        <div class="drv"><label>อัตราส่วนกำลังต่อประชากร 1,000 คน <span class="v" id="ratioV">10</span></label><input type="range" id="ratio" min="1" max="25" step="0.5" value="10"><small>2–5 = ภารกิจเบา (บอสเนีย/อัฟกานิสถานช่วงแรก) · 10 = ปานกลาง · 20 = ความไม่สงบสูง (มาลายา ไอร์แลนด์เหนือ)</small></div>
+        <div class="kpi"><div class="lbl">กำลังพลที่ต้องการ</div><div class="val" id="troops">–</div><div class="foot" id="troopsCmp"></div></div>
+      </div>
+      <div class="card">
+        <h3>เทียบขนาด: อิหร่าน vs อิรัก vs อัฟกานิสถาน</h3>
+        <p class="note">ประชากรและพื้นที่ ณ ปีที่เกิดการรุกราน</p>
+        <div class="chart-box"><canvas id="cSize"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- METHODOLOGY -->
+  <section class="tab" id="tab-meth">
+    <div class="grid g2">
+      <div class="card theory">
+        <h3>กรอบแนวคิดที่ใช้ในแบบจำลอง</h3>
+        <h4>1. Scenario Planning — Peter Schwartz (1991), Shell</h4>
+        <p>ระบุ "ความไม่แน่นอนวิกฤต" 2 แกนสร้างเมทริกซ์ 2×2 แล้วเติมรายละเอียดเป็นเรื่องเล่าที่สอดคล้องภายใน พร้อม <b>ตัวบ่งชี้เตือนล่วงหน้า (signposts)</b> เพื่อเฝ้าดูว่าโลกกำลังเคลื่อนไปทางฉากทัศน์ใด</p>
+        <h4>2. Expected Utility — Bruce Bueno de Mesquita, <i>The War Trap</i> (1981)</h4>
+        <p>ผู้นำเลือกทางเลือกที่ให้อรรถประโยชน์คาดหมายสูงสุด</p>
+        <div class="formula">EU(option) = Σₛ P(s | option, x) · U(s)</div>
+        <h4>3. Multinomial Logit (การแปลงตัวขับเคลื่อนเป็นความน่าจะเป็น)</h4>
+        <div class="formula">zₛ = aₛ(option) + Σ_d βₛd · w_d · (x_d − 50)/50
+P(s) = exp(zₛ) / Σₖ exp(zₖ)</div>
+        <h4>4. Prospect Theory — Kahneman & Tversky (1979); ประยุกต์ใน IR โดย Jervis, Levy, McDermott</h4>
+        <p>ผู้นำ "กลัวเสีย" มากกว่า "อยากได้" และให้น้ำหนักเหตุการณ์โอกาสต่ำเกินจริง → อาจยอมเสี่ยงสูงเมื่อรู้สึกว่าอยู่ใน "โดเมนแห่งการสูญเสีย"</p>
+        <div class="formula">v(x) = x^0.88 (x≥0) ; −2.25·(−x)^0.88 (x&lt;0)
+w(p) = p^γ / (p^γ + (1−p)^γ)^(1/γ),  γ = 0.61</div>
+        <h4>5. Poliheuristic Theory — Alex Mintz (2004)</h4>
+        <p>ผู้นำตัดทางเลือกที่กระทบความอยู่รอดทางการเมืองก่อน (ไม่ชดเชยกันได้) แล้วจึงเลือกอย่างมีเหตุผลจากทางเลือกที่เหลือ</p>
+        <h4>6. Bargaining Model of War — James Fearon (1995)</h4>
+        <p>เพราะสงครามมีต้นทุน จึงมีข้อตกลงที่ทั้งสองฝ่ายพอใจกว่าการรบเสมอ สงครามเกิดเพราะ (1) ข้อมูลไม่สมมาตร+แรงจูงใจให้บลัฟ (2) ปัญหาความน่าเชื่อถือของพันธะ (commitment problem) (3) ประเด็นที่แบ่งแยกไม่ได้</p>
+        <h4>7. Escalation Ladder — Herman Kahn, <i>On Escalation</i> (1965)</h4>
+        <h4>8. Cross-Impact Analysis — Gordon & Helmer (1966)</h4>
+        <h4>9. Monte Carlo Simulation & การแจกแจงสามเหลี่ยม (PERT-style)</h4>
+        <h4>10. Force-Ratio — James Quinlivan, RAND (1995) "Force Requirements in Stability Operations"</h4>
+      </div>
+      <div class="card theory">
+        <h3>มุมมองเชิงองค์กร: Allison's Three Models (1971)</h3>
+        <div class="scroll-x"><table>
+          <tr><th>แบบจำลอง</th><th>คำถามหลัก</th><th>ประยุกต์กับกรณีนี้</th></tr>
+          <tr><td><b>Rational Actor</b></td><td>ทางเลือกใดให้ผลประโยชน์สูงสุดต่อรัฐ?</td><td>แท็บ "เปรียบเทียบทางเลือก" — EU, ต้นไม้การตัดสินใจ</td></tr>
+          <tr><td><b>Organizational Process</b></td><td>หน่วยงานมีแผน/ขีดความสามารถสำเร็จรูปอะไร?</td><td>CENTCOM ถูกสั่งเตรียมทางเลือกกลับสู่การรบใหญ่ — แผนที่มีอยู่จำกัดขอบเขตทางเลือกจริง</td></tr>
+          <tr><td><b>Governmental Politics</b></td><td>ใครต่อรองกับใคร ภายใต้แรงกดดันอะไร?</td><td>ทำเนียบขาว–สภาคองเกรส (War Powers), การเลือกตั้งกลางเทอม, อิสราเอล, รัฐอ่าว, ผู้ไกล่เกลี่ย (ปากีสถาน กาตาร์ โอมาน)</td></tr>
+        </table></div>
+        <h3 style="margin-top:16px">ข้อจำกัดของแบบจำลอง</h3>
+        <p>• ค่าสัมประสิทธิ์ β และค่าผลลัพธ์เป็นการประเมินเชิงอัตวิสัย ควรปรับเทียบ (calibrate) ด้วยการประชุมผู้เชี่ยวชาญแบบ Delphi</p>
+        <p>• ฉากทัศน์ถูกสมมติให้แยกขาดกัน (mutually exclusive) แต่ในความจริงอาจเกิดซ้อนกันหรือเปลี่ยนผ่านตามเวลา (เช่น S3 → S5)</p>
+        <p>• อรรถประโยชน์มองจากผลประโยชน์สหรัฐเป็นหลัก — ผู้ใช้ควรพิจารณามุมมองอิหร่าน ประเทศในภูมิภาค และพลเรือนควบคู่</p>
+        <p>• ข้อมูลฐานเปลี่ยนแปลงเร็ว ควรอัปเดตตัวขับเคลื่อนตามข่าวล่าสุด</p>
+        <h3 style="margin-top:16px">แหล่งข้อมูลฐาน (สถานการณ์ 2026)</h3>
+        <ul class="src">
+          <li><a href="https://en.wikipedia.org/wiki/2026_Iran_war" target="_blank" rel="noopener">2026 Iran war — Wikipedia</a> (วันเริ่มสงคราม, ต้นทุน DoD $47.1B, การล่มของหยุดยิง 8 ก.ค.)</li>
+          <li><a href="https://www.globalsecurity.org/military/ops/iran-war-update.htm" target="_blank" rel="noopener">GlobalSecurity — Iran War 2026 Daily Update</a> (ราคาเบรนท์ต.ค., คำสั่งเตรียมทางเลือกของ CENTCOM)</li>
+          <li><a href="https://www.aljazeera.com/news/2026/10/11/hormuz-attacks-intensify-as-efforts-to-end-war-on-iran-stall" target="_blank" rel="noopener">Al Jazeera — Hormuz attacks intensify (11 ต.ค. 2026)</a></li>
+          <li><a href="https://en.wikipedia.org/wiki/2026_Strait_of_Hormuz_crisis" target="_blank" rel="noopener">2026 Strait of Hormuz crisis — Wikipedia</a></li>
+          <li><a href="https://www.everycrsreport.com/files/2026-10-13_IF12106_96f83d3fea2da0a9863ce4e386e0330c60953f27.html" target="_blank" rel="noopener">CRS IF12106 — Iran and Nuclear Weapons Production (13 ต.ค. 2026)</a></li>
+          <li><a href="https://www.pulse.bot/defense/news/iran-nuclear-programme-set-back-but-not-wiped-out-600453f0-f9cc-4b52-bb34-559f528288e7/" target="_blank" rel="noopener">Al-Monitor via Pulse — HEU ~440 กก.</a></li>
+          <li><a href="https://www.cbsnews.com/live-updates/iran-war-us-trump-talks-russia-strait-of-hormuz/" target="_blank" rel="noopener">CBS News live updates (ต.ค. 2026)</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+</div>
+<footer>Iran Scenario Lab · แบบจำลองเพื่อการศึกษา · ปรับสมมติฐานได้ทั้งหมดในแถบซ้าย</footer>
+
+<script>
+/* ===================== DATA ===================== */
+const DRIVERS=[
+ {id:'coh',  name:'ความเหนียวแน่นของระบอบ/IRGC', hint:'สูง = กองทัพและ IRGC ยังจงรักภักดี ต่อต้านได้มาก', def:60, short:'ระบอบ/IRGC'},
+ {id:'proxy',name:'ศักยภาพเครือข่ายพันธมิตรอิหร่าน', hint:'ฮิซบอลเลาะห์ ฮูตี กองกำลังในอิรัก', def:55, short:'เครือข่ายพันธมิตร'},
+ {id:'great',name:'การหนุนหลังจากรัสเซีย/จีน', hint:'อาวุธ ข่าวกรอง การทูตใน UNSC', def:35, short:'รัสเซีย/จีน'},
+ {id:'dom',  name:'แรงสนับสนุนในประเทศสหรัฐ', hint:'ความเห็นสาธารณะ สภาคองเกรส War Powers', def:40, short:'แรงหนุนในสหรัฐ'},
+ {id:'coal', name:'ความแข็งแรงของแนวร่วม', hint:'อิสราเอล รัฐอ่าว ยุโรป สิทธิใช้ฐานทัพ', def:50, short:'แนวร่วม'},
+ {id:'force',name:'ขนาดกำลังภาคพื้นที่ทุ่มเท', hint:'เทียบกับความต้องการตามอัตราส่วน Quinlivan', def:30, short:'กำลังภาคพื้น'},
+ {id:'energy',name:'ความยืดหยุ่นตลาดพลังงานโลก', hint:'คลังสำรอง SPR, ท่อทางเลือก, กำลังผลิตส่วนเกิน', def:55, short:'ตลาดพลังงาน'},
+ {id:'opp',  name:'ความพร้อมโครงสร้างเปลี่ยนผ่านในอิหร่าน', hint:'ฝ่ายค้านที่เป็นเอกภาพ, ข้าราชการพลเรือนทำงานต่อได้', def:30, short:'โครงสร้างเปลี่ยนผ่าน'},
+ {id:'nuc',  name:'ความเสี่ยงวัสดุนิวเคลียร์', hint:'HEU ~440 กก. ไม่ทราบที่ตั้ง, ภัยถอนตัว NPT', def:50, short:'ความเสี่ยงนิวเคลียร์'},
+];
+const PRESETS={
+ base:{coh:60,proxy:55,great:35,dom:40,coal:50,force:30,energy:55,opp:30,nuc:50},
+ opt:{coh:30,proxy:35,great:20,dom:65,coal:70,force:75,energy:70,opp:65,nuc:35},
+ pes:{coh:80,proxy:75,great:60,dom:25,coal:35,force:25,energy:35,opp:15,nuc:75},
+};
+const SC=[
+ {id:'S1',name:'ชนะเร็ว–เปลี่ยนผ่านราบรื่น',type:'best',tag:'Best case',color:'--s1',pos:[18,18],
+  desc:'กองทัพและ IRGC แตกแถว ระบอบล่มสลายภายในไม่กี่เดือน กลไกรัฐพลเรือนยังทำงาน มีรัฐบาลเปลี่ยนผ่านที่ได้รับการยอมรับ ช่องแคบฮอร์มุซเปิด ราคาน้ำมันลดลง',
+  sign:['นายทหารระดับสูง IRGC/Artesh แปรพักตร์','การลุกฮือในเมืองใหญ่หลายแห่งพร้อมกัน','ข้าราชการ/สาธารณูปโภคยังทำงาน'],
+  analog:'ปานามา 1989; อิรัก 2003 (เฉพาะช่วง 3 สัปดาห์แรก)',
+  tri:{dur:[2,4,9],cost:[150,300,600],oil:[80,100,125],hum:[10,20,35],util:[45,70,90]},pol:0},
+ {id:'S2',name:'ยุติด้วยการต่อรองภายใต้แรงบีบ',type:'best',tag:'Best-ish',color:'--s2',pos:[55,14],
+  desc:'ภัยคุกคามที่น่าเชื่อถือหรือการรุกจำกัดผลักให้เตหะรานยอมรับข้อตกลง (จำกัดการเสริมสมรรถนะ เปิดให้ IAEA ตรวจ เปิดช่องแคบ) ก่อนสงครามภาคพื้นขยายตัว',
+  sign:['ผู้ไกล่เกลี่ย (ปากีสถาน กาตาร์ โอมาน) ยื่นร่างฉบับแก้ไขและได้รับคำตอบ','หยุดยิงชั่วคราวที่ถือปฏิบัติได้จริง','ปริมาณเรือผ่านฮอร์มุซกลับสู่ระดับก่อนสงคราม'],
+  analog:'โคโซโว 1999 (coercive diplomacy); MOU มิ.ย. 2026',
+  tri:{dur:[1,3,6],cost:[20,60,150],oil:[72,88,105],hum:[3,8,15],util:[20,45,65]},pol:15},
+ {id:'S3',name:'ชนะทางทหาร–ติดหล่มยึดครอง',type:'mid',tag:'Quagmire',color:'--s3',pos:[80,32],
+  desc:'ยึดเมืองหลักได้ แต่เผชิญการก่อความไม่สงบยืดเยื้อในประเทศที่ใหญ่กว่าอิรักราว 3.7 เท่าและประชากรมากกว่า 3.5 เท่า ต้องคงกำลังจำนวนมากหลายปี',
+  sign:['การโจมตีขบวนลำเลียง/IED เพิ่มต่อเนื่อง','เครือข่าย Basij แปรเป็นกองโจร','ต้นทุนรายเดือนและการสูญเสียเพิ่มทุกไตรมาส'],
+  analog:'อิรัก 2003–2011; อัฟกานิสถาน 2001–2021',
+  tri:{dur:[24,60,120],cost:[800,1800,3500],oil:[90,115,150],hum:[45,65,85],util:[-60,-30,0]},pol:70},
+ {id:'S4',name:'รัฐล่มสลาย–แตกเป็นเสี่ยง',type:'mid',tag:'Fragmentation',color:'--s4',pos:[24,58],
+  desc:'อำนาจกลางล่มโดยไม่มีผู้รับช่วง ภูมิภาคชายขอบ (เคิร์ด บาลูจ อาเซอรี อาหรับ) แยกตัว เกิดสุญญากาศความมั่นคง ผู้ลี้ภัยหลายล้าน และความเสี่ยงที่อาวุธ/วัสดุนิวเคลียร์หลุดมือ',
+  sign:['สูญเสียการควบคุมจังหวัดชายแดน','คลื่นผู้ลี้ภัยสู่ตุรกี ปากีสถาน อาร์เมเนีย','ไม่สามารถยืนยันที่ตั้ง HEU'],
+  analog:'ลิเบีย 2011; ซีเรีย 2011–',
+  tri:{dur:[12,48,120],cost:[300,900,2000],oil:[95,125,165],hum:[55,75,95],util:[-70,-45,-15]},pol:60},
+ {id:'S5',name:'ชะงักงัน–ถอนตัวโดยไม่บรรลุเป้า',type:'mid',tag:'Stalemate',color:'--s5',pos:[72,50],
+  desc:'ต้นทุนการเมืองภายในสหรัฐสูงขึ้น สภาคองเกรสจำกัดงบ/อำนาจ ถอนหรือลดกำลังโดยไม่บรรลุเป้าหมาย ระบอบอยู่รอดและแข็งกร้าวขึ้น ฮอร์มุซยังไม่เสถียร',
+  sign:['มติ War Powers ผ่านสภา','คะแนนนิยมผู้นำลดลงต่อเนื่อง','การลดเป้าหมาย (เช่น จาก "ห้ามเสริมสมรรถนะ" เป็น "ลดลงอย่างมีนัย")'],
+  analog:'เวียดนาม 1973; อัฟกานิสถาน 2021',
+  tri:{dur:[6,14,30],cost:[200,500,1100],oil:[90,112,140],hum:[20,35,55],util:[-60,-35,-10]},pol:75},
+ {id:'S6',name:'สงครามภูมิภาคเต็มรูปแบบ',type:'worst',tag:'Worst',color:'--s6',pos:[68,80],
+  desc:'ปิดทั้งฮอร์มุซและบาบเอลมันเดบ โจมตีโครงสร้างพลังงานในอ่าว แนวรบเลบานอน อิรัก เยเมนลุกพร้อมกัน ราคาน้ำมันพุ่ง เศรษฐกิจโลกถดถอย',
+  sign:['โรงกลั่น/ท่าเรือซาอุฯ ยูเออีถูกโจมตีหนัก','ฮูตีปิดทะเลแดงต่อเนื่อง','ฐานทัพสหรัฐในอิรัก/ซีเรียถูกโจมตีรายวัน'],
+  analog:'Tanker War 1987–88 (แต่ขยายวงกว่ามาก)',
+  tri:{dur:[6,18,40],cost:[500,1200,2500],oil:[130,170,230],hum:[55,75,92],util:[-90,-65,-35]},pol:85},
+ {id:'S7',name:'วิกฤตมหาอำนาจ/นิวเคลียร์',type:'worst',tag:'Worst case',color:'--s7',pos:[45,92],
+  desc:'รัสเซีย/จีนเข้าแทรกทางทหารโดยตรงหรือเผชิญหน้าทางทะเล หรืออิหร่านถอนตัวจาก NPT และเร่งสร้างอาวุธ หรือวัสดุนิวเคลียร์หลุดสู่ผู้ไม่ใช่รัฐ',
+  sign:['ประกาศถอนตัวจาก NPT','เรือรบรัสเซีย/จีนคุ้มกันเรืออิหร่าน','รายงานการเคลื่อนย้าย HEU'],
+  analog:'วิกฤตขีปนาวุธคิวบา 1962 (ระดับความเสี่ยง)',
+  tri:{dur:[3,12,36],cost:[800,2500,6000],oil:[150,200,300],hum:[70,90,100],util:[-100,-90,-70]},pol:100},
+];
+// beta[scenario][driver]  order: coh, proxy, great, dom, coal, force, energy, opp, nuc
+const B=[
+ [-2.0,-1.0,-0.8, 0.6, 0.8, 1.2, 0.3, 1.6,-0.5],
+ [ 0.5,-0.3,-0.2, 0.3, 0.6, 0.2, 0.5, 0.2, 0.2],
+ [ 1.0, 0.6, 0.5, 0.3,-0.2,-0.8, 0.0,-0.6, 0.0],
+ [-0.5, 0.3, 0.2, 0.0,-0.4,-1.0, 0.0,-0.8, 0.6],
+ [ 1.2, 0.4, 0.6,-1.5,-0.6,-0.6, 0.0, 0.0, 0.0],
+ [ 0.8, 1.8, 0.6, 0.0,-0.8, 0.0,-0.9, 0.0, 0.4],
+ [ 0.3, 0.6, 2.0,-0.2,-0.6, 0.2,-0.5, 0.0, 1.6],
+];
+const OPTS=[
+ {id:'P1',name:'บุกยึดเต็มรูปแบบ',desc:'รุกภาคพื้นเพื่อโค่นระบอบและยึดครอง',rung:6,a:[0.0,-0.8,0.9,0.5,0.0,0.4,-1.0],forceW:1,oppW:1,costM:1,humM:1},
+ {id:'P2',name:'ยึดพื้นที่จำกัด',desc:'ชายฝั่ง เกาะ และช่องแคบฮอร์มุซ',rung:5,a:[-1.6,0.3,-0.2,-1.0,0.6,0.6,-1.4],forceW:0.6,oppW:0.4,costM:0.55,humM:0.75},
+ {id:'P3',name:'คงสงครามอากาศ-ทะเล',desc:'โจมตีทางอากาศต่อเนื่อง + ปิดล้อมทางทะเล',rung:4,a:[-2.2,0.6,-2.5,-1.0,1.0,0.5,-1.6],forceW:0.1,oppW:0.3,costM:0.35,humM:0.6},
+ {id:'P4',name:'ยุติด้วยข้อตกลง',desc:'ฟื้น MOU + จำกัดการเสริมสมรรถนะ + เปิดฮอร์มุซ',rung:2,a:[-2.5,1.8,-3.0,-1.8,0.8,-0.6,-2.2],forceW:0,oppW:0.2,costM:0.2,humM:0.45},
+];
+const LADDER=['การทูตบีบบังคับ / คว่ำบาตร','ข้อตกลงหยุดยิง / เจรจา (MOU)','ปิดล้อมทางทะเล','สงครามทางอากาศ-ทะเลเต็มรูป','ยึดพื้นที่จำกัด (ชายฝั่ง/เกาะ)','บุกภาคพื้นเต็มรูป / ยึดครอง','สงครามภูมิภาคหลายแนวรบ','การเผชิญหน้ามหาอำนาจ / นิวเคลียร์'];
+const CURRENT_RUNG=4;
+// cross impact row->col
+const CROSS=[
+ [0, 1, 1,-1, 0, 0, 0,-2, 1],
+ [1, 0, 1,-1,-2, 0,-2, 0, 0],
+ [2, 1, 0, 0,-1,-1,-1,-1, 1],
+ [0, 0, 0, 0, 1, 2, 0, 0, 0],
+ [-1,-1,-1,1, 0, 1, 1, 1,-1],
+ [-1,1, 1,-1, 0, 0, 0, 1,-1],
+ [0, 0, 0, 1, 1, 0, 0, 0, 0],
+ [-2,0, 0, 1, 1, 0, 0, 0,-1],
+ [1, 0, 1, 1,-1, 1,-1, 0, 0],
+];
+const HIST=[
+ ['สงครามอ่าว (Desert Storm)','1991','~6 สัปดาห์ (ภาคพื้น ~100 ชม.)','~148 (สู้รบ)','เป้าหมายจำกัด ไม่ยึดครอง','สำเร็จตามเป้าจำกัด ระบอบอยู่รอด','S2'],
+ ['ปานามา (Just Cause)','1989','~1 เดือน','23','ประเทศเล็ก ~2.4 ล้านคน','เปลี่ยนระบอบรวดเร็ว','S1'],
+ ['อัฟกานิสถาน','2001–2021','20 ปี','~2,400','ประชากร ~21 ล้าน','ตาลีบันกลับสู่อำนาจ','S3 → S5'],
+ ['อิรัก (Iraqi Freedom)','2003–2011','8+ ปี','~4,400','ประชากร ~25 ล้าน','ชนะเร็ว แล้วติดหล่มก่อความไม่สงบ','S3'],
+ ['ลิเบีย (ทางอากาศ)','2011','~7 เดือน','0 (ไม่มีกำลังภาคพื้น)','ระบอบล่มเร็ว','รัฐแตกเป็นเสี่ยงยาวนาน','S4'],
+ ['เวียดนาม','1965–1973','8+ ปี','~58,000','มหาอำนาจหนุนอีกฝ่าย','ถอนตัว','S5'],
+ ['สงครามอิรัก–อิหร่าน','1980–1988','8 ปี','–','ทดสอบความอดทนของอิหร่าน','อิหร่านระดมพลต้านได้ยาวนาน','บ่งชี้ความเหนียวแน่น'],
+];
+
+/* ===================== HELPERS ===================== */
+const $=s=>document.querySelector(s);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const pct=v=>(v*100).toFixed(1)+'%';
+const triMean=t=>(t[0]+t[1]+t[2])/3;
+const fmtB=v=>v>=1000?('$'+(v/1000).toFixed(2)+' ล้านล้าน'):('$'+Math.round(v).toLocaleString()+' พันล้าน');
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+function triSample(t,r){const [a,c,b]=t;const u=r();const f=(c-a)/(b-a||1);return u<f?a+Math.sqrt(u*(b-a)*(c-a)):b-Math.sqrt((1-u)*(b-a)*(b-c));}
+function normal(r){let u=0,v=0;while(u===0)u=r();while(v===0)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+/* ===================== STATE ===================== */
+const state={x:{...PRESETS.base},opt:'P1',cross:false,prospect:false,thr:50,usD:0.85,irO:0.45,tm:'worst'};
+const OPT=id=>OPTS.find(o=>o.id===id);
+
+function effX(x){
+  if(!state.cross) return x;
+  const out={};
+  DRIVERS.forEach((d,i)=>{let s=0;DRIVERS.forEach((e,j)=>{if(i!==j)s+=CROSS[j][i]*(x[e.id]-50)/50;});out[d.id]=clamp(x[d.id]+6*s,0,100);});
+  return out;
+}
+function probs(optId,xRaw){
+  const o=OPT(optId), x=effX(xRaw);
+  const z=SC.map((s,k)=>{let v=o.a[k];DRIVERS.forEach((d,j)=>{let w=1;if(d.id==='force')w=o.forceW;if(d.id==='opp')w=o.oppW;v+=B[k][j]*w*(x[d.id]-50)/50;});return v;});
+  const m=Math.max(...z);const e=z.map(v=>Math.exp(v-m));const s=e.reduce((a,b)=>a+b,0);return e.map(v=>v/s);
+}
+function triFor(optId,k,key){
+  const o=OPT(optId);const t=SC[k].tri[key];
+  if(k<5 && key==='cost') return t.map(v=>v*o.costM);
+  if(k<5 && key==='hum') return t.map(v=>v*o.humM);
+  return t;
+}
+const vPT=x=>x>=0?Math.pow(x,0.88):-2.25*Math.pow(-x,0.88);
+const wPT=p=>{const g=0.61;return Math.pow(p,g)/Math.pow(Math.pow(p,g)+Math.pow(1-p,g),1/g);};
+function evalOpt(optId,x){
+  const p=probs(optId,x);
+  const E=k=>p.reduce((a,pp,i)=>a+pp*triMean(triFor(optId,i,k)),0);
+  const euR=p.reduce((a,pp,i)=>a+pp*triMean(SC[i].tri.util),0);
+  const euP=p.reduce((a,pp,i)=>a+wPT(pp)*vPT(triMean(SC[i].tri.util)/100)*100,0);
+  const polRaw=p.reduce((a,pp,i)=>a+pp*SC[i].pol,0);
+  const pol=polRaw*(1.3-0.6*effX(x).dom/100);
+  return {p,best:p[0]+p[1],worst:p[5]+p[6],euR,euP,eu:state.prospect?euP:euR,cost:E('cost'),dur:E('dur'),oil:E('oil'),hum:E('hum'),pol};
+}
+
+/* ===================== UI BUILD ===================== */
+function buildControls(){
+  $('#optList').innerHTML=OPTS.map(o=>`<button class="opt-btn${o.id===state.opt?' active':''}" data-opt="${o.id}"><b>${o.id} · ${o.name}</b>${o.desc}</button>`).join('');
+  document.querySelectorAll('.opt-btn').forEach(b=>b.onclick=()=>{state.opt=b.dataset.opt;buildControls();update();});
+  if(!$('#drivers').children.length){
+    $('#drivers').innerHTML=DRIVERS.map(d=>`<div class="drv"><label for="d_${d.id}">${d.name}<span class="v" id="v_${d.id}">${state.x[d.id]}</span></label><input type="range" id="d_${d.id}" min="0" max="100" value="${state.x[d.id]}"><small>${d.hint}</small></div>`).join('');
+    DRIVERS.forEach(d=>{$('#d_'+d.id).oninput=e=>{state.x[d.id]=+e.target.value;$('#v_'+d.id).textContent=e.target.value;update();};});
+  }
+}
+function setPreset(k){state.x={...PRESETS[k]};DRIVERS.forEach(d=>{$('#d_'+d.id).value=state.x[d.id];$('#v_'+d.id).textContent=state.x[d.id];});update();}
+
+/* ===================== CHARTS ===================== */
+let charts={};
+function chartDefaults(){
+  Chart.defaults.font.family='"IBM Plex Sans Thai",sans-serif';
+  Chart.defaults.color=css('--muted');
+  Chart.defaults.borderColor=css('--grid');
+}
+function mk(id,cfg){if(charts[id])charts[id].destroy();charts[id]=new Chart(document.getElementById(id),cfg);return charts[id];}
+const scColors=()=>SC.map(s=>css(s.color));
+
+function drawProb(r){
+  mk('cProb',{type:'bar',data:{labels:SC.map(s=>s.id+' '+s.name),datasets:[{data:r.p.map(v=>+(v*100).toFixed(2)),backgroundColor:scColors(),borderRadius:4}]},
+   options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw.toFixed(1)+'%'}}},
+   scales:{x:{max:100,title:{display:true,text:'ความน่าจะเป็น (%)'}},y:{ticks:{color:css('--text'),font:{size:12}}}}}});
+}
+function drawMatrix(r){
+  const x=effX(state.x);const W=520,H=440,pad=50;
+  const sx=v=>pad+v/100*(W-pad-20), sy=v=>H-pad-v/100*(H-pad-20);
+  const cx=x.coh, cy=(x.proxy+x.great+x.nuc)/3;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Scenario matrix">`;
+  const qx=sx(50),qy=sy(50);
+  const q=[[pad,20,'สุญญากาศอำนาจลุกลาม'],[qx,20,'สงครามขยายวง'],[pad,qy,'ล่มเร็ว ควบคุมได้'],[qx,qy,'ยืดเยื้อแต่จำกัดวง']];
+  q.forEach((t,i)=>{s+=`<rect x="${t[0]}" y="${t[1]}" width="${qx-pad}" height="${qy-20}" fill="${i===1?css('--s6'):i===2?css('--s1'):css('--panel2')}" fill-opacity="${i===1||i===2?0.08:0.6}" stroke="${css('--border')}"/>`;
+    s+=`<text x="${t[0]+8}" y="${t[1]+18}" font-size="12" fill="${css('--muted')}" font-weight="600">${t[2]}</text>`;});
+  s+=`<text x="${(W+pad)/2}" y="${H-12}" text-anchor="middle" font-size="12" fill="${css('--muted')}">ความสามารถต่อต้านของรัฐอิหร่าน → สูง</text>`;
+  s+=`<text transform="translate(16,${(H-pad)/2+10}) rotate(-90)" text-anchor="middle" font-size="12" fill="${css('--muted')}">ขอบเขตการขยายวง → ภูมิภาค/โลก</text>`;
+  SC.forEach((c,i)=>{const rr=7+42*Math.sqrt(r.p[i]);s+=`<circle cx="${sx(c.pos[0])}" cy="${sy(c.pos[1])}" r="${rr}" fill="${css(c.color)}" fill-opacity=".75" stroke="${css('--panel')}" stroke-width="1.5"><title>${c.name}: ${pct(r.p[i])}</title></circle>`;
+    s+=`<text x="${sx(c.pos[0])}" y="${sy(c.pos[1])+4}" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">${c.id}</text>`;
+    s+=`<text x="${sx(c.pos[0])}" y="${sy(c.pos[1])+rr+13}" text-anchor="middle" font-size="10.5" fill="${css('--text')}">${pct(r.p[i])}</text>`;});
+  s+=`<g stroke="${css('--text')}" stroke-width="2.5"><line x1="${sx(cx)-7}" y1="${sy(cy)-7}" x2="${sx(cx)+7}" y2="${sy(cy)+7}"/><line x1="${sx(cx)-7}" y1="${sy(cy)+7}" x2="${sx(cx)+7}" y2="${sy(cy)-7}"/></g>`;
+  s+=`<text x="${sx(cx)}" y="${sy(cy)+22}" text-anchor="middle" font-size="11" font-weight="700" fill="${css('--text')}" paint-order="stroke" stroke="${css('--panel')}" stroke-width="3">ปัจจุบัน</text></svg>`;
+  $('#matrix').innerHTML=s;
+}
+function drawLadder(){
+  const o=OPT(state.opt);
+  $('#ladder').innerHTML=LADDER.map((t,i)=>{const n=i+1;const cls=(n===CURRENT_RUNG?' now':'')+(n===o.rung?' sel':'');
+    const fl=[n===CURRENT_RUNG?'<span style="color:var(--accent2)">● ปัจจุบัน</span>':'',n===o.rung?`<span style="color:var(--accent)">● ${o.id}</span>`:''].join(' ');
+    return `<div class="rung${cls}"><span class="n">${n}</span>${t}<span class="flag">${fl}</span></div>`;}).join('');
+}
+function drawExp(r){
+  const items=[['ระยะเวลาคาดหมาย',r.dur.toFixed(1)+' เดือน'],['ต้นทุนการคลังสหรัฐเพิ่มเติม',fmtB(r.cost)],['ราคาเบรนท์สูงสุดคาดหมาย','$'+r.oil.toFixed(0)+'/บาร์เรล'],['ดัชนีความสูญเสียมนุษย์',r.hum.toFixed(0)+' / 100'],['ดัชนีความเสี่ยงการเมืองภายใน',r.pol.toFixed(0)+' / 100'],['EU (Rational / Prospect)',r.euR.toFixed(1)+' / '+r.euP.toFixed(1)]];
+  $('#expOut').innerHTML=items.map(i=>`<div class="kpi" style="padding:6px 0;border-bottom:1px solid var(--border)"><div class="lbl">${i[0]}</div><div class="val" style="font-size:18px">${i[1]}</div></div>`).join('');
+}
+function narrative(r,all){
+  const o=OPT(state.opt);const order=r.p.map((p,i)=>[p,i]).sort((a,b)=>b[0]-a[0]);
+  const top=order[0],sec=order[1];
+  const tor=tornadoData('worst').slice(0,3).map(t=>t.name);
+  const bestOpt=all.filter(a=>a.r.pol<=state.thr).sort((a,b)=>b.r.eu-a.r.eu)[0];
+  let s=`ภายใต้ทางเลือก <b>${o.id} ${o.name}</b> และสมมติฐานปัจจุบัน ฉากทัศน์ที่มีโอกาสสูงสุดคือ <b>${SC[top[1]].name}</b> (${pct(top[0])}) รองลงมาคือ <b>${SC[sec[1]].name}</b> (${pct(sec[0])}). `;
+  s+=`โอกาสกรณีดี (S1+S2) = <b style="color:var(--good)">${pct(r.best)}</b> เทียบกับกรณีเลวร้าย (S6+S7) = <b style="color:var(--bad)">${pct(r.worst)}</b>. `;
+  s+=`ตัวขับเคลื่อนที่มีอิทธิพลต่อความเสี่ยงกรณีเลวร้ายมากที่สุด 3 อันดับ: ${tor.join(', ')}. `;
+  s+= bestOpt?`เมื่อคัดกรองแบบ Poliheuristic (เกณฑ์ ${state.thr}) แล้ว ทางเลือกที่ให้อรรถประโยชน์คาดหมาย${state.prospect?' (Prospect)':''} สูงสุดคือ <b>${bestOpt.o.id} ${bestOpt.o.name}</b> (EU ${bestOpt.r.eu.toFixed(1)}).`:`ทุกทางเลือกเกินเกณฑ์ความเสี่ยงทางการเมือง — ผู้ตัดสินใจอาจต้องลดเกณฑ์หรือหาทางเลือกใหม่.`;
+  $('#narr').innerHTML=s;
+}
+function drawScTable(r){
+  let h='<tr><th>ฉากทัศน์</th><th>ประเภท</th><th>ความน่าจะเป็น</th><th>ระยะเวลา (ด.)</th><th>ต้นทุน (พันล้าน$)</th><th>เบรนท์สูงสุด ($)</th><th>ความสูญเสียมนุษย์</th><th>U สหรัฐ</th><th>กรณีเทียบเคียง</th></tr>';
+  SC.forEach((s,i)=>{const f=k=>triFor(state.opt,i,k).map(v=>Math.round(v)).join('–');
+    h+=`<tr><td><span class="dot" style="background:${css(s.color)}"></span><b>${s.id}</b> ${s.name}</td><td><span class="tag ${s.type}">${s.tag}</span></td>
+    <td class="num">${pct(r.p[i])}<div class="pbar"><i style="width:${r.p[i]*100}%;background:${css(s.color)}"></i></div></td>
+    <td class="num">${f('dur')}</td><td class="num">${f('cost')}</td><td class="num">${f('oil')}</td><td class="num">${f('hum')}</td><td class="num">${f('util')}</td><td>${s.analog}</td></tr>`;});
+  $('#scTable').innerHTML=h;
+  $('#scCards').innerHTML=SC.map((s,i)=>`<div class="card" style="border-top:4px solid ${css(s.color)}"><h3>${s.id} · ${s.name} <span class="tag ${s.type}">${s.tag}</span></h3><p class="note">ความน่าจะเป็น ${pct(r.p[i])}</p><p style="font-size:13.5px;margin:4px 0 8px">${s.desc}</p><div style="font-size:12.5px;color:var(--muted);font-weight:600">ตัวบ่งชี้เตือนล่วงหน้า (Signposts)</div><ul style="margin:4px 0 0;padding-left:18px;font-size:13px">${s.sign.map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('');
+}
+function drawTree(all){
+  const W=900,H=480;const dx=40,dy=H/2,ox=250;const oys=[60,175,305,420];
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%">`;
+  s+=`<rect x="${dx-14}" y="${dy-14}" width="28" height="28" fill="${css('--accent2')}"/><text x="${dx}" y="${dy+34}" text-anchor="middle" font-size="11" fill="${css('--muted')}">ผู้ตัดสินใจ</text>`;
+  all.forEach((a,i)=>{const y=oys[i];const sel=a.o.id===state.opt;const elim=a.r.pol>state.thr;
+    s+=`<path d="M${dx+14},${dy} C${dx+100},${dy} ${ox-110},${y} ${ox-14},${y}" fill="none" stroke="${sel?css('--accent'):css('--border')}" stroke-width="${sel?3:1.5}" ${elim?'stroke-dasharray="5 4"':''}/>`;
+    s+=`<g style="cursor:pointer" data-node="${a.o.id}"><circle cx="${ox}" cy="${y}" r="14" fill="${sel?css('--accent'):css('--panel2')}" stroke="${css('--text')}" stroke-width="1"/>`;
+    s+=`<text x="${ox-22}" y="${y-20}" text-anchor="end" font-size="12.5" font-weight="600" fill="${css('--text')}">${a.o.id} ${a.o.name}</text>`;
+    s+=`<text x="${ox-22}" y="${y-5}" text-anchor="end" font-size="11" fill="${elim?css('--bad'):css('--muted')}">EU ${a.r.eu.toFixed(1)}${elim?' · ตกเกณฑ์การเมือง':''}</text></g>`;
+  });
+  const a=all.find(a=>a.o.id===state.opt);const i0=all.indexOf(a);const y0=oys[i0];const lx=540;
+  SC.forEach((sc,k)=>{const ly=30+k*((H-60)/6);
+    s+=`<path d="M${ox+14},${y0} C${ox+120},${y0} ${lx-120},${ly} ${lx-8},${ly}" fill="none" stroke="${css(sc.color)}" stroke-width="${1+a.r.p[k]*12}" stroke-opacity=".8"/>`;
+    s+=`<polygon points="${lx-8},${ly-6} ${lx+4},${ly} ${lx-8},${ly+6}" fill="${css(sc.color)}"/>`;
+    s+=`<text x="${lx+10}" y="${ly-2}" font-size="12" fill="${css('--text')}" font-weight="600">${sc.id} ${sc.name}</text>`;
+    s+=`<text x="${lx+10}" y="${ly+13}" font-size="11" fill="${css('--muted')}" class="mono">p=${a.r.p[k].toFixed(3)} · U=${triMean(sc.tri.util).toFixed(0)} · p·U=${(a.r.p[k]*triMean(sc.tri.util)).toFixed(1)}</text>`;});
+  s+='</svg>';$('#tree').innerHTML=s;
+  document.querySelectorAll('#tree [data-node]').forEach(g=>g.onclick=()=>{state.opt=g.dataset.node;buildControls();update();});
+}
+function drawEU(all){
+  mk('cEU',{type:'bar',data:{labels:all.map(a=>a.o.id+' '+a.o.name),datasets:[
+    {label:'Rational EU',data:all.map(a=>+a.r.euR.toFixed(1)),backgroundColor:css('--accent2'),borderRadius:4},
+    {label:'Prospect Theory',data:all.map(a=>+a.r.euP.toFixed(1)),backgroundColor:css('--accent'),borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,scales:{y:{title:{display:true,text:'อรรถประโยชน์'}},x:{ticks:{color:css('--text')}}}}});
+}
+function drawRadar(all){
+  const labs=['ต้นทุนการคลัง','ระยะเวลา','ราคาน้ำมัน','ความสูญเสียมนุษย์','P(Worst)','ความเสี่ยงการเมือง'];
+  const pal=['--s6','--s4','--s3','--s2'];
+  mk('cRadar',{type:'radar',data:{labels:labs,datasets:all.map((a,i)=>({label:a.o.id+' '+a.o.name,data:[clamp(a.r.cost/30,0,100),clamp(a.r.dur/0.6,0,100),clamp((a.r.oil-70)/1.8,0,100),a.r.hum,a.r.worst*100,clamp(a.r.pol,0,100)],
+    borderColor:css(pal[i]),backgroundColor:css(pal[i])+'22',borderWidth:a.o.id===state.opt?3:1.5,pointRadius:2}))},
+    options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:0,max:100,ticks:{display:false},grid:{color:css('--grid')},angleLines:{color:css('--grid')},pointLabels:{color:css('--text'),font:{size:11.5}}}}}});
+}
+function drawPoly(all){
+  let h='<tr><th>ทางเลือก</th><th>ดัชนีความเสี่ยงการเมืองภายใน</th><th>ขั้น 1: ผ่านเกณฑ์?</th><th>ขั้น 2: EU</th><th>อันดับ</th></tr>';
+  const passed=all.filter(a=>a.r.pol<=state.thr).sort((a,b)=>b.r.eu-a.r.eu);
+  all.forEach(a=>{const ok=a.r.pol<=state.thr;const rank=ok?passed.indexOf(a)+1:'–';
+    h+=`<tr><td><b>${a.o.id}</b> ${a.o.name}</td><td class="num">${a.r.pol.toFixed(1)}<div class="pbar"><i style="width:${clamp(a.r.pol,0,100)}%;background:${ok?css('--good'):css('--bad')}"></i></div></td><td class="${ok?'pass':'fail'}">${ok?'✓ ผ่าน':'✕ ตัดทิ้ง'}</td><td class="num">${a.r.eu.toFixed(1)}</td><td class="num">${rank}</td></tr>`;});
+  $('#polyTable').innerHTML=h;
+}
+function drawFearon(){
+  const x=effX(state.x);const n=k=>(x[k]-50)/50;
+  const p=clamp(0.5+0.22*n('force')-0.2*n('coh')+0.12*n('coal')-0.1*n('great')+0.05*n('opp'),0.05,0.95);
+  const cUS=0.06+0.14*(1-x.dom/100)+0.08*(1-x.energy/100)+0.05*x.nuc/100+0.04*x.proxy/100;
+  const cIR=0.08+0.12*x.force/100+0.06*x.coal/100-0.05*x.great/100+0.05*(1-x.coh/100);
+  const lo=clamp(p-cUS,0,1),hi=clamp(p+cIR,0,1);
+  const W=760,L=40,R=W-40,y=70;const X=v=>L+v*(R-L);
+  let s=`<svg viewBox="0 0 ${W} 150" width="100%">`;
+  s+=`<line x1="${L}" y1="${y}" x2="${R}" y2="${y}" stroke="${css('--muted')}" stroke-width="2"/>`;
+  for(let i=0;i<=10;i++){s+=`<line x1="${X(i/10)}" y1="${y-5}" x2="${X(i/10)}" y2="${y+5}" stroke="${css('--muted')}"/><text x="${X(i/10)}" y="${y+20}" text-anchor="middle" font-size="10" fill="${css('--muted')}">${(i/10).toFixed(1)}</text>`;}
+  s+=`<rect x="${X(lo)}" y="${y-14}" width="${Math.max(2,X(hi)-X(lo))}" height="28" fill="${css('--good')}" fill-opacity=".22" stroke="${css('--good')}"/>`;
+  s+=`<text x="${(X(lo)+X(hi))/2}" y="${y-20}" text-anchor="middle" font-size="11" fill="${css('--good')}" font-weight="600">ช่วงการต่อรอง [${lo.toFixed(2)}, ${hi.toFixed(2)}]</text>`;
+  const mark=(v,c,t,dy)=>`<line x1="${X(v)}" y1="${y-26}" x2="${X(v)}" y2="${y+26}" stroke="${c}" stroke-width="2.5"/><text x="${X(v)}" y="${y+dy}" text-anchor="middle" font-size="11" fill="${c}" font-weight="600">${t}</text>`;
+  s+=mark(p,css('--text'),'p = '+p.toFixed(2),46);
+  s+=mark(state.usD,css('--accent2'),'ข้อเรียกร้องสหรัฐ',-34);
+  s+=mark(state.irO,css('--accent'),'ข้อเสนออิหร่าน',62);
+  s+=`<text x="${L}" y="14" font-size="10.5" fill="${css('--muted')}">← เอื้ออิหร่าน</text><text x="${R}" y="14" text-anchor="end" font-size="10.5" fill="${css('--muted')}">เอื้อสหรัฐ →</text></svg>`;
+  $('#fearon').innerHTML=s;
+  const usOK=state.usD<=hi, irOK=state.irO>=lo;
+  let t=`p (โอกาสสหรัฐบังคับเงื่อนไขได้ด้วยกำลัง) = <b>${p.toFixed(2)}</b> · ต้นทุนสงครามของสหรัฐ c<sub>US</sub> = ${cUS.toFixed(2)} · ของอิหร่าน c<sub>IR</sub> = ${cIR.toFixed(2)}. `;
+  if(usOK&&irOK) t+=`<span class="pass">ข้อเรียกร้องและข้อเสนออยู่ในช่วงต่อรอง → มีพื้นที่สำหรับข้อตกลง</span> ปัญหาที่เหลือคือ "ความน่าเชื่อถือของพันธะ" และ "ข้อมูลไม่สมมาตร"`;
+  else { t+=`<span class="fail">ช่องว่างเกินช่วงต่อรอง</span> — `;
+    if(!usOK) t+=`ข้อเรียกร้องสหรัฐ (${state.usD.toFixed(2)}) สูงกว่าที่อิหร่านจะยอมรับแทนการรบ (${hi.toFixed(2)}) `;
+    if(!irOK) t+=`ข้อเสนออิหร่าน (${state.irO.toFixed(2)}) ต่ำกว่าที่สหรัฐจะยอมรับแทนการรบ (${lo.toFixed(2)}) `;
+    t+=`→ ตามทฤษฎีของ Fearon ความเชื่อที่คลาดเคลื่อนเรื่องดุลอำนาจ (p) ของแต่ละฝ่ายคือสาเหตุหลักที่ทำให้สงครามดำเนินต่อ`; }
+  $('#fearonTxt').innerHTML=t;
+}
+function tornadoData(metric){
+  const f=x=>{const r=evalOpt(state.opt,x);return metric==='worst'?r.worst*100:metric==='best'?r.best*100:r.eu;};
+  const base=f(state.x);
+  return DRIVERS.map(d=>{const lo=f({...state.x,[d.id]:0}),hi=f({...state.x,[d.id]:100});return {name:d.short,lo,hi,base,range:Math.abs(hi-lo)};}).sort((a,b)=>b.range-a.range);
+}
+function drawTornado(){
+  const td=tornadoData(state.tm);const lab={worst:'P(Worst) %',best:'P(Best) %',eu:'อรรถประโยชน์คาดหมาย'}[state.tm];
+  document.querySelectorAll('[data-tm]').forEach(b=>b.classList.toggle('primary',b.dataset.tm===state.tm));
+  mk('cTor',{type:'bar',data:{labels:td.map(t=>t.name),datasets:[
+    {label:'ตัวขับเคลื่อน = 0',data:td.map(t=>[t.base,t.lo]),backgroundColor:css('--accent2')},
+    {label:'ตัวขับเคลื่อน = 100',data:td.map(t=>[t.base,t.hi]),backgroundColor:css('--accent')}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:lab+` (ฐาน = ${td[0].base.toFixed(1)})`}},y:{stacked:true,ticks:{color:css('--text')}}},
+    plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw[1].toFixed(1)}}}}});
+}
+function drawCross(){
+  const col=v=>v===0?'transparent':v>0?`rgba(46,154,102,${0.2+0.25*v})`:`rgba(208,69,59,${0.2+0.25*-v})`;
+  let h='<tr><th>แถว → คอลัมน์</th>'+DRIVERS.map(d=>`<th style="text-align:center">${d.short}</th>`).join('')+'</tr>';
+  DRIVERS.forEach((d,i)=>{h+=`<tr><th style="text-align:left">${d.short}</th>`+DRIVERS.map((e,j)=>i===j?'<td style="background:var(--panel2)">—</td>':`<td style="background:${col(CROSS[i][j])}">${CROSS[i][j]>0?'+':''}${CROSS[i][j]}</td>`).join('')+'</tr>';});
+  $('#xTable').innerHTML=h;
+}
+function drawHist(){
+  let h='<tr><th>กรณี</th><th>ปี</th><th>ระยะเวลา</th><th>ทหารสหรัฐเสียชีวิต (ประมาณ)</th><th>บริบท</th><th>ผลลัพธ์</th><th>ฉากทัศน์ที่ใกล้เคียง</th></tr>';
+  HIST.forEach(r=>{h+=`<tr><td><b>${r[0]}</b></td><td class="num">${r[1]}</td><td>${r[2]}</td><td class="num">${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td></tr>`;});
+  $('#histTable').innerHTML=h;
+  mk('cSize',{type:'bar',data:{labels:['อัฟกานิสถาน 2001','อิรัก 2003','อิหร่าน 2026'],datasets:[
+    {label:'ประชากร (ล้านคน)',data:[21,25,91.6],backgroundColor:css('--accent2'),yAxisID:'y'},
+    {label:'พื้นที่ (พัน ตร.กม.)',data:[652,438,1648],backgroundColor:css('--accent'),yAxisID:'y1'}]},
+    options:{responsive:true,maintainAspectRatio:false,scales:{y:{position:'left',title:{display:true,text:'ล้านคน'}},y1:{position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'พัน ตร.กม.'}},x:{ticks:{color:css('--text')}}}}});
+  calcTroops();
+}
+function calcTroops(){
+  const pop=+$('#pop').value,ratio=+$('#ratio').value;$('#popV').textContent=pop.toFixed(1);$('#ratioV').textContent=ratio;
+  const t=pop*1e6*ratio/1000;$('#troops').textContent=Math.round(t).toLocaleString()+' นาย';
+  $('#troopsCmp').innerHTML=`≈ ${(t/170000).toFixed(1)} เท่าของกำลังสหรัฐในอิรักช่วงสูงสุด (~170,000 นาย ปี 2007) · ≈ ${(t/450000).toFixed(1)} เท่าของกำลังประจำการกองทัพบกสหรัฐทั้งหมด (~450,000)`;
+}
+
+/* ===================== MONTE CARLO ===================== */
+function hist(arr,bins,lo,hi){const w=(hi-lo)/bins;const c=new Array(bins).fill(0);arr.forEach(v=>{let i=Math.floor((v-lo)/w);i=clamp(i,0,bins-1);c[i]++;});return {labels:c.map((_,i)=>Math.round(lo+w*i+w/2)),c};}
+function q(arr,p){const s=[...arr].sort((a,b)=>a-b);return s[Math.floor(p*(s.length-1))];}
+function runMC(){
+  const N=+$('#mcN').value,sig=+$('#mcS').value,seed=+$('#mcSeed').value;const r=mulberry32(seed);
+  const out={cost:[],dur:[],oil:[],hum:[],util:[]},freq=new Array(7).fill(0);const t0=performance.now();
+  for(let i=0;i<N;i++){
+    const x={};DRIVERS.forEach(d=>x[d.id]=clamp(state.x[d.id]+sig*normal(r),0,100));
+    const p=probs(state.opt,x);let u=r(),k=0,acc=p[0];while(u>acc&&k<6){k++;acc+=p[k];}
+    freq[k]++;
+    out.cost.push(triSample(triFor(state.opt,k,'cost'),r));out.dur.push(triSample(triFor(state.opt,k,'dur'),r));
+    out.oil.push(triSample(triFor(state.opt,k,'oil'),r));out.hum.push(triSample(triFor(state.opt,k,'hum'),r));out.util.push(triSample(SC[k].tri.util,r));
+  }
+  $('#mcInfo').textContent=`${N.toLocaleString()} รอบ · ${(performance.now()-t0).toFixed(0)} ms · ${OPT(state.opt).id}`;
+  const H=(id,arr,lo,hi,col,xl)=>{const h=hist(arr,24,lo,hi);mk(id,{type:'bar',data:{labels:h.labels,datasets:[{data:h.c.map(v=>v/N*100),backgroundColor:css(col),barPercentage:1,categoryPercentage:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw.toFixed(2)+'% ของการจำลอง'}}},scales:{y:{title:{display:true,text:'% ของรอบ'}},x:{title:{display:true,text:xl},ticks:{maxTicksLimit:8}}}}});};
+  H('hCost',out.cost,0,Math.max(...out.cost),'--accent2','พันล้าน $');H('hDur',out.dur,0,Math.max(...out.dur),'--s3','เดือน');
+  H('hOil',out.oil,60,Math.max(...out.oil),'--s4','$/บาร์เรล');H('hUtil',out.util,-100,100,'--accent','U');
+  const rows=[['ต้นทุนการคลัง (พันล้าน$)',out.cost],['ระยะเวลา (เดือน)',out.dur],['เบรนท์สูงสุด ($)',out.oil],['ความสูญเสียมนุษย์ (0–100)',out.hum],['อรรถประโยชน์สหรัฐ',out.util]];
+  let h='<tr><th>ตัวชี้วัด</th><th>เฉลี่ย</th><th>P10</th><th>P50</th><th>P90</th></tr>';
+  rows.forEach(([n,a])=>{const m=a.reduce((x,y)=>x+y,0)/a.length;h+=`<tr><td>${n}</td><td class="num">${m.toFixed(1)}</td><td class="num">${q(a,.1).toFixed(1)}</td><td class="num">${q(a,.5).toFixed(1)}</td><td class="num">${q(a,.9).toFixed(1)}</td></tr>`;});
+  const pl=out.util.filter(v=>v<0).length/N;h+=`<tr><td><b>P(ผลลัพธ์ติดลบต่อสหรัฐ)</b></td><td class="num" colspan="4" style="text-align:left">${pct(pl)}</td></tr>`;
+  $('#mcTable').innerHTML=h;
+  mk('mcFreq',{type:'bar',data:{labels:SC.map(s=>s.id),datasets:[{data:freq.map(v=>v/N*100),backgroundColor:scColors(),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>SC[c[0].dataIndex].name,label:c=>c.raw.toFixed(1)+'%'}}},scales:{y:{title:{display:true,text:'%'}}}}});
+}
+
+/* ===================== UPDATE ===================== */
+function update(){
+  const all=OPTS.map(o=>({o,r:evalOpt(o.id,state.x)}));const r=all.find(a=>a.o.id===state.opt).r;
+  const ti=r.p.indexOf(Math.max(...r.p));
+  $('#kTop').textContent=SC[ti].id+' '+SC[ti].name;$('#kTopP').textContent='p = '+pct(r.p[ti])+' · ทางเลือก '+state.opt;
+  $('#kBest').textContent=pct(r.best);$('#kWorst').textContent=pct(r.worst);
+  $('#kEU').textContent=r.eu.toFixed(1);$('#kEU').style.color=r.eu>=0?css('--good'):css('--bad');
+  $('#kEUlbl').textContent=state.prospect?'มูลค่าคาดหมาย (Prospect)':'อรรถประโยชน์คาดหมาย (EU)';
+  drawProb(r);drawMatrix(r);drawLadder();drawExp(r);drawScTable(r);drawTree(all);drawEU(all);drawRadar(all);drawPoly(all);drawFearon();drawTornado();narrative(r,all);
+}
+
+/* ===================== INIT ===================== */
+function init(){
+  chartDefaults();buildControls();drawCross();drawHist();
+  document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>setPreset(b.dataset.preset));
+  $('#crossChk').onchange=e=>{state.cross=e.target.checked;update();};
+  $('#prospectChk').onchange=e=>{state.prospect=e.target.checked;update();};
+  $('#thr').oninput=e=>{state.thr=+e.target.value;$('#thrV').textContent=e.target.value;update();};
+  $('#usD').oninput=e=>{state.usD=e.target.value/100;$('#usDV').textContent=state.usD.toFixed(2);drawFearon();};
+  $('#irO').oninput=e=>{state.irO=e.target.value/100;$('#irOV').textContent=state.irO.toFixed(2);drawFearon();};
+  document.querySelectorAll('[data-tm]').forEach(b=>b.onclick=()=>{state.tm=b.dataset.tm;drawTornado();});
+  $('#mcN').oninput=e=>$('#nV').textContent=e.target.value;
+  $('#mcS').oninput=e=>$('#sigV').textContent=e.target.value;
+  $('#mcSeed').oninput=e=>$('#seedV').textContent=e.target.value;
+  $('#runMC').onclick=runMC;
+  $('#pop').oninput=calcTroops;$('#ratio').oninput=calcTroops;
+  document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('active',x===b));
+    document.querySelectorAll('section.tab').forEach(s=>s.classList.toggle('active',s.id==='tab-'+b.dataset.tab));
+    Object.values(charts).forEach(c=>c.resize());
+  });
+  update();runMC();
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{chartDefaults();drawHist();update();runMC();});
+}
+if(window.Chart) init(); else window.addEventListener('load',init);
+</script>
+</body>
+</html>
